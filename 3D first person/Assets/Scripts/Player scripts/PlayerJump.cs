@@ -5,10 +5,10 @@ using UnityEngine;
 public class PlayerJump : MonoBehaviour
 {
     private CharacterController characterController;
-    private float verticalVelocity;
+    public static float verticalVelocity;
     private float groundedTimer;
     private float jumpHeight = 2f;
-    private float gravityValue = 9.81f;
+    public static float gravityValue = 9.81f;
     private bool allowSecondJump = false;
 
     public static bool groundedPlayer = true;
@@ -48,19 +48,6 @@ public class PlayerJump : MonoBehaviour
             verticalVelocity = -0.5f;
         }
 
-        
-        if (PlayerWallRun.isWallRunning) // Don't apply gravity or velocity while wall running
-        {
-            gravityValue = 0f;
-            verticalVelocity = 0f;
-        }
-        else
-        {
-            gravityValue = 9.81f;
-            // apply gravity always, to let us track down ramps properly
-            verticalVelocity -= gravityValue * Time.deltaTime;
-        }
-
 
         // allow jump as long as the player is on the ground
         if (Input.GetButtonDown("Jump"))
@@ -96,6 +83,13 @@ public class PlayerJump : MonoBehaviour
         // call .Move() once only
         characterController.Move(jump * Time.deltaTime);
 
+    }
+
+    public void ResetGravityValue()
+    {
+        gravityValue = 9.81f;
+        // apply gravity always, to let us track down ramps properly
+        verticalVelocity -= gravityValue * Time.deltaTime;
     }
 }
 
