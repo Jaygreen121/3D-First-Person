@@ -5,59 +5,48 @@ using UnityEngine;
 public class PlayerWallRun : MonoBehaviour
 {
     public static bool isWallRunning = false;
-    private float wallRunSpeed = 5.0f;
-    private CharacterController characterController;
+    private bool afterWallRun = false;
 
     private Animator animator;
 
     public PlayerJump playerJump;
+    public PlayerMovement playerMovement;
 
     // Start is called before the first frame update
     void Start()
     {
         animator = GetComponent<Animator>();
-        characterController = GetComponent<CharacterController>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.D) && !PlayerJump.groundedPlayer)
+        if (CheckWall(transform.right) || CheckWall(-transform.right))
         {
-            if (CheckWall(transform.right))
+            if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.LeftShift) && !PlayerJump.groundedPlayer) // replace the check for seeing if you're grounded with a check to see if you are a certain distance off the ground
             {
                 isWallRunning = true;
+                playerMovement.WallRunAction();
+                afterWallRun = true;
             }
             else
             {
                 isWallRunning = false;
             }
+        }
+        else
+        {
+            isWallRunning = false;
         }
 
         animator.SetBool("IsWallRunning", isWallRunning);
 
-        if (Input.GetKey(KeyCode.A) && !PlayerJump.groundedPlayer)
-        {
-            if (CheckWall(-transform.right))
-            {
-                isWallRunning = true;
-            }
-            else
-            {
-                isWallRunning = false;
-            }
-        }
-
-        if (isWallRunning)
-        {
-            WallRunAction();
-        }
-        else
+        if (afterWallRun && !isWallRunning)
         {
             playerJump.ResetGravityValue();
+            afterWallRun = false;
         }
 
-        // TODO set isWallRunning to false here aswell 
     }
 
     bool CheckWall(Vector3 direction)
@@ -75,17 +64,5 @@ public class PlayerWallRun : MonoBehaviour
         }
 
         return false; // No wall detected
-    }
-
-    void WallRunAction()
-    {
-        PlayerJump.gravityValue = 0f;
-        PlayerJump.verticalVelocity = 0f;
-        
-        // Calculate the forward direction along the wall
-        Vector3 wallDirection = isWallRunning ? (transform.forward.normalized * wallRunSpeed) : Vector3.zero;
-
-        // Apply movement along the wall
-        characterController.Move(wallDirection * Time.deltaTime);
     }
 }
